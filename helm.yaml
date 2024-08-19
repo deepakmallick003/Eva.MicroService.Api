@@ -1,0 +1,12 @@
+applications:
+  - name: "eva-api"
+
+    technology: static
+
+    ingress:
+      enabled: true
+      domain: "rest.cabi.org"
+      basePath: "/eva"
+
+    seq:
+      -enabled: false

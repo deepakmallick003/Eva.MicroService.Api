@@ -1,0 +1,18 @@
+trigger:
+  - development
+  - release/*
+      
+resources:
+  repositories:
+    - repository: self
+    - repository: deployments
+      type: git
+      name: Cabi.Kubernetes.Deployment.2021
+
+stages:
+- template: microservice.yaml@deployments
+  parameters:
+    REPOSITORY_NAME: 'Cabi.Eva.Microservice.Api'
+    PROJECTS:
+      - "eva-api"
+    BUILD_ID: $(Build.BuildNumber)
