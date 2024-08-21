@@ -1,9 +1,9 @@
 fastapi
+fastapi_azure_auth
 pydantic-settings
 uvicorn
 python-dotenv
 pandas
-
 langchain 
 langchain-community
 langchain_openai

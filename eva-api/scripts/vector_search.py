@@ -1,7 +1,9 @@
-from .models import model_vector_search
+from scripts.models import model_vector_search
+from scripts.vectordatabases import BaseDB
+
 # from langchain.embeddings import OpenAIEmbeddings
 from langchain_openai import OpenAIEmbeddings
-from .vectordatabases import BaseDB
+from bson import ObjectId
 
 class VectorSearch:
     def __init__(self, vector_search_data: model_vector_search.VectorSearchRequest):
@@ -18,4 +20,18 @@ class VectorSearch:
 
         result = db_instance.vector_search(llm_embeddings, self.vs_data)
         
-        return result
+        documents = []
+        for doc, score in result:
+            clean_metadata = {
+                key: str(value) if not isinstance(value, str) and not isinstance(value, dict) else value
+                for key, value in doc.metadata.items() if key != '_id' and key != 'embedding'
+            }
+            retrieved_chunk = model_vector_search.RetrievedDocumentChunk(
+                content=doc.page_content,  
+                metadata=clean_metadata,  
+                relevancy_score=score    
+            )
+            
+            documents.append(retrieved_chunk)
+
+        return model_vector_search.VectorSearchResponse(documents=documents)

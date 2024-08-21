@@ -1,7 +1,7 @@
-from .models import model_embed
+from scripts.models import model_embed
 # from langchain.embeddings import OpenAIEmbeddings
 from langchain_openai import OpenAIEmbeddings
-from .vectordatabases import BaseDB
+from scripts.vectordatabases import BaseDB
 
 class EmbedData:
     def __init__(self, embed_data: model_embed.EmbedDataRequest):
@@ -18,4 +18,4 @@ class EmbedData:
 
         result_message = db_instance.embed_documents(llm_embeddings, self.embed_data)
         
-        return result_message
+        return model_embed.EmbedDataResponse(success=True, message=result_message) 

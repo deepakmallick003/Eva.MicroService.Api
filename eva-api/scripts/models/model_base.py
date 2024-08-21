@@ -31,13 +31,13 @@ class VectorDimensionSize(int, Enum):
 
 class DocumentChunk(BaseModel):
     """Represents a document with chunked text and associated metadata."""
-    chunk: str
+    content: str
     metadata: Dict[str, str]
 
 class RetrievedDocumentChunk(BaseModel):
     """Represents a document retrieved from the vector search, with a relevancy score."""
-    chunk: str
-    metadata: Dict[str, str]
+    content: str
+    metadata: Dict[str, Any]
     relevancy_score: float
 
 class DBSettings(BaseModel):

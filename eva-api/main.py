@@ -1,12 +1,52 @@
-from fastapi import FastAPI, Request, Body, HTTPException
+from typing import Optional
+from fastapi import FastAPI, Request, Security, HTTPException
 from fastapi.responses import RedirectResponse
 from fastapi.middleware.cors import CORSMiddleware
-from .core.config import settings
-from .routers import health
-
-from .scripts import *
+from fastapi.openapi.models import OAuthFlows as OAuthFlowsModel
+from fastapi.security.utils import get_authorization_scheme_param
+from fastapi.security import OAuth2
+from core.config import settings
+from routers import health
+from scripts import *
 
 def get_application() -> FastAPI:
+
+    class Oauth2ClientCredentials(OAuth2):
+        def __init__(
+            self,
+            tokenUrl: str,
+            client_id: str,
+            scheme_name: str = None,
+            scopes: dict = None,
+            auto_error: bool = True,
+        ):
+            if not scopes:
+                scopes = {}
+            flows = OAuthFlowsModel(clientCredentials={"tokenUrl": tokenUrl, "scopes": scopes})
+            self.client_id = client_id
+            super().__init__(flows=flows, scheme_name=scheme_name, auto_error=auto_error)
+
+        async def __call__(self, request: Request) -> Optional[str]:
+            authorization: str = request.headers.get("Authorization")
+            scheme, param = get_authorization_scheme_param(authorization)
+            if not authorization or scheme.lower() != "bearer":
+                if self.auto_error:
+                    raise HTTPException(
+                        status_code=401,
+                        detail="Not authenticated",
+                        headers={"WWW-Authenticate": "Bearer"},
+                    )
+                else:
+                    return None
+            return param
+
+
+    # Initialize the OAuth2 scheme for client credentials
+    auth_scheme = Oauth2ClientCredentials(
+        tokenUrl=f"https://login.microsoftonline.com/{settings.CABI_TenantId}/oauth2/v2.0/token",
+        client_id=settings.EVA_API_ClientId,
+        scopes={f'api://{settings.EVA_API_ClientId}/.default': 'api.read'}  
+    )
 
     tags_metadata = [
         {
@@ -17,10 +57,10 @@ def get_application() -> FastAPI:
     app = FastAPI(
         version='1.0.0',
         title=settings.PROJECT_NAME,
-        description="API's for all AI/ML/LLM based use cases centralized under EVA",
+        description="**Utility** based API for **AI/ML/LLM** based development for different internal CABI use cases",
         docs_url=settings.DOC_URL,
-        root_path=settings.DEPLOYED_BASE_PATH,
-        openapi_tags=tags_metadata
+        # root_path=settings.DEPLOYED_BASE_PATH,
+        # openapi_tags=tags_metadata,      
     )
 
     # Enabled CORS
@@ -32,13 +72,6 @@ def get_application() -> FastAPI:
         allow_headers=['*'],
     )
 
-    # @app.on_event('startup')
-    # async def load_config() -> None:
-    #     """
-    #     Load OpenID config on startup.
-    #     """
-    #     # await azure_scheme.openid_config.load_config()
-
     # include healthcheck router
     app.include_router(health.router)
 
@@ -48,10 +81,10 @@ def get_application() -> FastAPI:
         return RedirectResponse('swagger')
 
 
-
-    # endpoint for data chunking
-    @app.post("/chunk-data", tags=["API"], response_model=model_chunk.ChunkDataResponse)
+    @app.post("/chunk-data", response_model=model_chunk.ChunkDataResponse, 
+              dependencies=[Security(auth_scheme)], tags=["API"])
     async def chunk_data(payload: model_chunk.ChunkDataRequest):
+     
         try:
             chunk_processor = chunk.ChunkData(payload)
             chunked_data = chunk_processor.process_chunks()
@@ -59,21 +92,22 @@ def get_application() -> FastAPI:
         except Exception as e:
             raise HTTPException(status_code=500, detail=f"Chunking operation failed: {str(e)}")
 
-
-    # endpoint for data embedding
-    @app.post("/embed-chunks", tags=["API"], response_model=model_embed.EmbedDataResponse)
+    
+    # endpoint for data embed
+    @app.post("/embed-chunks", response_model=model_embed.EmbedDataResponse, 
+              dependencies=[Security(auth_scheme)], tags=["API"])
     async def embed_chunks(payload: model_embed.EmbedDataRequest):
         try:
             data_embedder = embed.EmbedData(payload)
             response = data_embedder.embed()
             return response
         except Exception as e:
-            # raise HTTPException(status_code=500, detail=f"Embedding operation failed: {str(e)}")
-            print(e)
+            raise HTTPException(status_code=500, detail=f"Embedding operation failed: {str(e)}")
 
 
     # endpoint for vector search
-    @app.post("/vector-search", tags=["API"], response_model=model_vector_search.VectorSearchResponse)
+    @app.post("/vector-search", response_model=model_vector_search.VectorSearchResponse, 
+              dependencies=[Security(auth_scheme)], tags=["API"])
     async def perform_vector_search(payload: model_vector_search.VectorSearchRequest):
         try:
             vector_searcher = vector_search.VectorSearch(payload)

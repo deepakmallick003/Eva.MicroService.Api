@@ -1,5 +1,5 @@
 applications:
-  - name: "eva-api"
+  - name: "eva.api"
 
     technology: static
 
