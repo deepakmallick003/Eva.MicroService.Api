@@ -1,52 +1,12 @@
-from typing import Optional
 from fastapi import FastAPI, Request, Security, HTTPException
 from fastapi.responses import RedirectResponse
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.openapi.models import OAuthFlows as OAuthFlowsModel
-from fastapi.security.utils import get_authorization_scheme_param
-from fastapi.security import OAuth2
 from core.config import settings
+from core.auth import auth_scheme
 from routers import health
 from scripts import *
 
 def get_application() -> FastAPI:
-
-    class Oauth2ClientCredentials(OAuth2):
-        def __init__(
-            self,
-            tokenUrl: str,
-            client_id: str,
-            scheme_name: str = None,
-            scopes: dict = None,
-            auto_error: bool = True,
-        ):
-            if not scopes:
-                scopes = {}
-            flows = OAuthFlowsModel(clientCredentials={"tokenUrl": tokenUrl, "scopes": scopes})
-            self.client_id = client_id
-            super().__init__(flows=flows, scheme_name=scheme_name, auto_error=auto_error)
-
-        async def __call__(self, request: Request) -> Optional[str]:
-            authorization: str = request.headers.get("Authorization")
-            scheme, param = get_authorization_scheme_param(authorization)
-            if not authorization or scheme.lower() != "bearer":
-                if self.auto_error:
-                    raise HTTPException(
-                        status_code=401,
-                        detail="Not authenticated",
-                        headers={"WWW-Authenticate": "Bearer"},
-                    )
-                else:
-                    return None
-            return param
-
-
-    # Initialize the OAuth2 scheme for client credentials
-    auth_scheme = Oauth2ClientCredentials(
-        tokenUrl=f"https://login.microsoftonline.com/{settings.CABI_TenantId}/oauth2/v2.0/token",
-        client_id=settings.EVA_API_ClientId,
-        scopes={f'api://{settings.EVA_API_ClientId}/.default': 'api.read'}  
-    )
 
     tags_metadata = [
         {

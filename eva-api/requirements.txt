@@ -10,6 +10,7 @@ langchain_openai
 pymongo
 openai
 tiktoken
+cryptography
 
 #--locally required modules (uncomment before creating envrionment for the prupose of using jupter notenbook or something else)---
 #jupyter
