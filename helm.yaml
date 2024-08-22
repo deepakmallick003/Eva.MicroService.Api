@@ -8,8 +8,12 @@ applications:
       domain: "rest.cabi.org"
       basePath: "/eva"
 
-    azureAd:
-      - server: eva-api
-
+    mountSecrets:
+      - secret: azure-ad
+        mappings:
+          - key: eva-api-clientid
+            nameAs: AzureAd__ClientId
+          - key: TenantId
+            nameAs: AzureAd__TenantId
     seq:
       -enabled: false
