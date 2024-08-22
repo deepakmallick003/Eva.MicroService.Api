@@ -8,5 +8,8 @@ applications:
       domain: "rest.cabi.org"
       basePath: "/eva"
 
+    azureAd:
+      - server: eva-api
+
     seq:
       -enabled: false

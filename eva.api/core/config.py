@@ -10,8 +10,8 @@ class ApplicationSettings(BaseSettings):
     # CABI_TenantId: str = Field(default='', env='CABI__TenantId')
 
     DEPLOYED_BASE_PATH: str = Field(alias='DEPLOYED_BASE_PATH')
-    EVA_API_ClientId: str = Field(alias='EVA__API__ClientId')
-    CABI_TenantId: str = Field(alias='CABI__TenantId')
+    EVA_API_ClientId: str = Field(alias='AzureAd__ClientId')
+    CABI_TenantId: str = Field(alias='AzureAd__TenantId')
 
 
 class Settings(ApplicationSettings):
