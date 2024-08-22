@@ -19,8 +19,7 @@ def get_application() -> FastAPI:
         title=settings.PROJECT_NAME,
         description="**Utility** based API for **AI/ML/LLM** based development for different internal CABI use cases",
         docs_url=settings.DOC_URL,
-        # root_path=settings.DEPLOYED_BASE_PATH,
-        # openapi_tags=tags_metadata,      
+        root_path=settings.DEPLOYED_BASE_PATH
     )
 
     # Enabled CORS
