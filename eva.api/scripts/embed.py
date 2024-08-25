@@ -14,8 +14,7 @@ class EmbedData:
             dimensions= self.embed_data.llm_settings.vector_dimension_size                  
         )
 
-        db_instance = BaseDB().get_vector_db(self.embed_data.db_type)
-
-        result_message = db_instance.embed_documents(llm_embeddings, self.embed_data)
+        db_instance = BaseDB().get_vector_db(self.embed_data.db_type, self.embed_data.db_settings, llm_embeddings)
+        result_message = db_instance.embed_documents(self.embed_data.documents)
         
         return model_embed.EmbedDataResponse(success=True, message=result_message) 

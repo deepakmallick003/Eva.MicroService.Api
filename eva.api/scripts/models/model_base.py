@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator 
 from typing import List, Dict, Optional, Any
 from enum import Enum
 
@@ -33,6 +33,16 @@ class DocumentChunk(BaseModel):
     """Represents a document with chunked text and associated metadata."""
     content: str
     metadata: Dict[str, str]
+
+    @field_validator('metadata')
+    def check_required_keys(cls, v):
+        required_keys = ['Source', 'Type']
+        if v is None:
+            raise ValueError("metadata cannot be None and must contain 'Source' and 'Type'.")
+        for key in required_keys:
+            if key not in v:
+                raise ValueError(f"'{key}' is a required key in metadata.")
+        return v
 
 class RetrievedDocumentChunk(BaseModel):
     """Represents a document retrieved from the vector search, with a relevancy score."""

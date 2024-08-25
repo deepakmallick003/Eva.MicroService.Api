@@ -16,9 +16,9 @@ class VectorSearch:
             dimensions= self.vs_data.llm_settings.vector_dimension_size                  
         )
 
-        db_instance = BaseDB().get_vector_db(self.vs_data.db_type)
+        db_instance = BaseDB().get_vector_db(self.vs_data.db_type, self.vs_data.db_settings, llm_embeddings)
 
-        result = db_instance.vector_search(llm_embeddings, self.vs_data)
+        result = db_instance.vector_search(self.vs_data.query)
         
         documents = []
         for doc, score in result:

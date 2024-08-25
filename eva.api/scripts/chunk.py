@@ -1,17 +1,11 @@
-import requests
 from scripts.models import model_chunk
 from typing import Dict, Any
-
-from langchain.text_splitter import CharacterTextSplitter, RecursiveJsonSplitter, RecursiveCharacterTextSplitter
-import json
-from langchain.schema import Document
-
+from langchain.text_splitter import RecursiveJsonSplitter
 
 class ChunkData:
     def __init__(self, chunk_data: model_chunk.ChunkDataRequest):
         self.chunk_data = chunk_data
     
-
     def process_chunks(self):
         splitter = RecursiveJsonSplitter(max_chunk_size=400, min_chunk_size=200)
 
@@ -68,8 +62,6 @@ class ChunkData:
         # Return the chunked data as a response
         return model_chunk.ChunkDataResponse(documents=documents)
     
-
-
     def create_document(self, text: str, metadata: dict) -> model_chunk.DocumentChunk:
         return model_chunk.DocumentChunk(
             content=text,
