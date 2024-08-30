@@ -25,20 +25,19 @@ class MongoDB():
         Public method to embed or update the documents in the vector store. 
         Group all chunks of the same document together before deleting and re-embedding.
         """
+        # Group documents by all metadata key-value pairs
+        grouped_chunks = self._group_chunks_by_all_metadata(documents)
 
-        # Group documents by source
-        grouped_chunks = self._group_chunks_by_source_document(documents)
+        # Check and delete existing chunks based on the groupings
+        self._check_and_delete_existing_chunk_groups(grouped_chunks)
 
-        for source, chunk_group in grouped_chunks.items():
-            # Check if any chunks with the same document source exist and delete if they do
-            self._check_and_delete_existing_chunk_groups(source)
-
-            new_chunks = self._prepare_new_chunks(chunk_group, source)
-
-            # Add the new embeddings to the vector store
+        # Prepare and embed new chunks
+        for metadata_key, chunk_group in grouped_chunks.items():
+            new_chunks = self._prepare_new_chunks(chunk_group)
             self._add_chunks_to_vector_store(new_chunks)
 
-        return  f"Documents successfully embedded in MongoDB: {self.db_settings.collection_name}"
+        return f"Documents successfully embedded in MongoDB: {self.db_settings.collection_name}"
+
 
     def vector_search(self, query):
         """
@@ -67,31 +66,39 @@ class MongoDB():
         )
         return vector_index
 
-    def _group_chunks_by_source_document(self, chunks):
+    def _group_chunks_by_all_metadata(self, chunks):
         """
-        Private method to group document chunks by their source.
+        Private method to group document chunks by all metadata key-value pairs.
         """
         grouped_chunks = defaultdict(list)
+
         for data in chunks:
-            grouped_chunks[data.metadata['Source']].append(data)
+            # Create a combined key for all metadata values
+            metadata_key = tuple(sorted((k, v) for k, v in data.metadata.items()))
+
+            # Group chunks by this combined metadata key
+            grouped_chunks[metadata_key].append(data)
+
         return grouped_chunks
 
-    def _check_and_delete_existing_chunk_groups(self, source):
+    def _check_and_delete_existing_chunk_groups(self, grouped_chunks):
         """
-        Private method to check if any documents with the given source exist in the MongoDB collection,
+        Private method to check if any documents with the given metadata exist in the MongoDB collection,
         and delete them if they do.
         """
-        # Use count_documents to check if there are any documents with the given source
-        doc_count = self.collection.count_documents({"Source": source})
+        for metadata_key, chunk_group in grouped_chunks.items():
+            # Convert the metadata_key tuple back to a dictionary for the query
+            query = dict(metadata_key)
 
-        if doc_count > 0:
-            # If documents exist, delete them
-            self.collection.delete_many({"Source": source})
-            return True
+            deleted_count = self.collection.delete_many(query).deleted_count
 
-        return False
+            if deleted_count > 0:
+                # print(f"Deleted {deleted_count} documents for Metadata: {metadata_key}")
+                pass
 
-    def _prepare_new_chunks(self, chunk_group, source):
+        return "Existing chunks successfully deleted from MongoDB."
+
+    def _prepare_new_chunks(self, chunk_group):
         """
         Private method to prepare new embeddings for all chunks of the document,
         generate content hashes for deduplication, and use the hash as document_id.
@@ -103,8 +110,8 @@ class MongoDB():
         seen_hashes = set()
 
         for data in chunk_group:
-            # Generate a hash of the chunk content, source, and source_type
-            content_hash = self._generate_content_hash(data.content, data.metadata['Source'], data.metadata['Type'])
+            # Generate a hash of the chunk content, and metadata
+            content_hash = self._generate_content_hash(data.content, data.metadata)
 
             if content_hash not in seen_hashes:
                 seen_hashes.add(content_hash)
@@ -124,15 +131,33 @@ class MongoDB():
 
         return new_chunks
 
-    def _generate_content_hash(self, content, source, type):
+    def _generate_content_hash(self, content, metadata):
         """
-        Private method to generate a SHA256 hash of the combination of content, source, and type for deduplication.
+        Private method to generate a SHA256 hash of the combination of content and all metadata elements for deduplication.
         """
-        combined_data = f"{source}-{type}-{content}"
+        # Combine the content with sorted metadata key-value pairs
+        metadata_string = ''.join(f"{key}:{value}" for key, value in sorted(metadata.items()))
+        combined_data = f"{content}-{metadata_string}"
+        
+        # Generate the SHA256 hash
         return hashlib.sha256(combined_data.encode('utf-8')).hexdigest()
 
     def _add_chunks_to_vector_store(self, new_chunks):
         """
-        Private method to add new chunks to the vector store.
+        Private method to add new chunks to the vector store with error handling.
+        If a duplicate key error (E11000) occurs, it skips the insertion and logs the event.
+        Raises any other exceptions that might occur.
         """
-        self.vector_index.add_documents(documents=new_chunks)
+        for chunk in new_chunks:
+            try:
+                # Attempt to add the document with the custom _id (content_hash)
+                self.vector_index.add_documents(documents=[chunk])
+            
+            except Exception as e:
+                # Check if it's a duplicate key error (E11000)
+                if 'E11000' in str(e):
+                    # print(f"Duplicate document detected for _id {chunk.metadata['_id']}. Skipping insertion.")
+                    pass  # Simply pass to continue with the next chunk
+                else:
+                    # For any other exceptions, raise the error
+                    raise e
