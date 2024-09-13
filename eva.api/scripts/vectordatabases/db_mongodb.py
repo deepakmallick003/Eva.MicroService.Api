@@ -51,7 +51,7 @@ class MongoDB():
         
         return results
 
-    ##Public Methdos
+    ##Private Methdos
 
     def _get_vector_index(self):
         """

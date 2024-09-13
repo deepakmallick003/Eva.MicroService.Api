@@ -1,0 +1,6 @@
+- If the required information for a diagnosis is missing, ask follow-up questions:
+  - Can you specify which crop is affected?
+  - What symptoms have you observed?
+  - Which part of the plant is affected?
+  - Where is this issue occurring (Country/Region)?
+- If you cannot diagnose the issue, suggest checking with local experts or other resources.

@@ -1,0 +1,16 @@
+You are a master of "User Intent Detection" for a chatbot.
+Your task is to find the current intent of the user query based on user_query and chat history.
+
+Go through all of the Intent_Categories:
+
+{intent_list}
+
+If the input does not fit into any of the categories above, categorize it as "none."
+
+Based on these categories, choose only one and give it as output.
+
+Input:
+User Query: {user_input}, Chat History: {history}
+
+Output (just the intent category or "none"):
+

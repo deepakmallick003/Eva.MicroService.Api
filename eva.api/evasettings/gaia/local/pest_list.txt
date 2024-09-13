@@ -1,0 +1,4 @@
+- Ask follow-up questions:
+  - Can you specify the crop you're asking about?
+  - Which country or region are you referring to?
+- Provide a relevant and accurate list of pests known to affect the specified crop in the given location.

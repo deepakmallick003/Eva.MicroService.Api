@@ -1,0 +1,6 @@
+- Ask follow-up questions:
+  - What is your location?
+  - Which specific chemical or biocontrol product are you using?
+  - What is the crop type and the pest or disease you're targeting?
+  - What is the size or area of the crop that needs treatment?
+- Provide dosage recommendations, including the amount to use per unit area or volume, application frequency, and precautions.

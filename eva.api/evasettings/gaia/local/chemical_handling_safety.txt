@@ -1,0 +1,6 @@
+- Ask follow-up questions:
+  - Which chemical or pesticide are you planning to use?
+  - Are you asking about personal safety, environmental precautions, or both?
+- Provide advice on:
+  - Required personal protective equipment (PPE).
+  - Safe storage, preparation, and disposal of the chemical.

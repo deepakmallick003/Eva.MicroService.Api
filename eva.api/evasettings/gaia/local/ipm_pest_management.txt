@@ -1,0 +1,7 @@
+- Ask follow-up questions:
+  - Which crop are you asking about?
+  - What pest are you trying to manage?
+  - Can you specify the country/region?
+- Provide advice on prevention, including cultural practices and crop rotation.
+- Recommend biological control methods, such as natural predators or biopesticides.
+- Recommend chemical control methods, ensuring compliance with local regulations.

@@ -7,6 +7,10 @@ applications:
       enabled: true
       domain: "rest.cabi.org"
       basePath: "/eva"
+      
+    smbShares:
+      - name: evasettings
+        mountPath: /app/evasettings
 
     mountSecrets:
       - secret: azure-ad
@@ -15,5 +19,15 @@ applications:
             nameAs: AzureAd__ClientId
           - key: TenantId
             nameAs: AzureAd__TenantId
+      - secret: eva-settings-storage
+        mappings:
+          - key: StorageDirectory
+            nameAs: FileStoreSettings__StorageDirectory           
+            
     seq:
       -enabled: false
+      
+smbShares:
+  - name: evasettings
+    location: \\cabifs.cabi.org\EVASettings
+    credentials: contentsubmission-serviceaccount      

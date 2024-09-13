@@ -76,6 +76,17 @@ def get_application() -> FastAPI:
             raise HTTPException(status_code=500, detail=f"Vector search failed: {str(e)}")
 
 
+    # endpoint for chatbot response
+    @app.post("/chatbot-response", response_model=model_rag.ChatResponse, 
+              dependencies=[Security(auth_scheme)], tags=["API"])
+    async def get_chatbot_response(payload: model_rag.ChatRequest):
+        try:
+            chat_processor = rag.RAG(payload)
+            response = chat_processor.get_response()
+            return response
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"Chatbot request failed: {str(e)}")
+
 
 
     return app
