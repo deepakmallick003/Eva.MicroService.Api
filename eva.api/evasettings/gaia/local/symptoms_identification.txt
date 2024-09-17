@@ -1,3 +1,7 @@
-- If the pest/problem is provided, list the symptoms and progression.
-- If details are missing, ask follow-up questions:
-  - Can you provide more details about the pest/problem?
+- **Essential Elements**:
+  - The pest or problem name is required to provide accurate symptom information.
+- **Follow-up Questions** (if necessary):
+  - If no pest or problem is mentioned in the conversation history (`<hs></hs>`) or the user input (`<ques></ques>`), ask:
+    - "Which pest or problem are you concerned about?"
+- **Response**:
+  - Provide a detailed list of symptoms associated with the pest/problem, including visual indicators and progression if available.

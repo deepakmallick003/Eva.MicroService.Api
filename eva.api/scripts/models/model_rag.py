@@ -1,5 +1,13 @@
 from .model_base import *
 
+
+class Source(BaseModel):
+    source: str
+    type: str
+    title: str
+    country: str
+    language: str
+
 class IntentDetails(BaseModel):
     filename: str
     description: Optional[str] = None
@@ -22,5 +30,5 @@ class ChatRequest(BaseModel):
 
 class ChatResponse(BaseModel):
     response: str  
-    sources: Optional[str] = None
+    sources: Optional[List[Source]] = None
 

@@ -6,7 +6,8 @@ from langchain.chains import RetrievalQAWithSourcesChain
 from langchain_core.runnables import RunnableSequence
 from langchain_openai import OpenAIEmbeddings, ChatOpenAI
 from langchain.prompts import PromptTemplate
-from langchain.memory import ConversationSummaryBufferMemory
+from langchain.memory import ConversationSummaryMemory, ChatMessageHistory
+from langchain.schema import HumanMessage, SystemMessage
 from core.config import settings
 
 class RAG:
@@ -16,13 +17,42 @@ class RAG:
     ##Public Methods
 
     def get_response(self):
+        self.llm_eva = ChatOpenAI(
+            model_name=self.chat_data.rag_settings.chat_model_name,
+            temperature=self.chat_data.rag_settings.temperature,
+            max_tokens=self.chat_data.rag_settings.max_tokens_for_response,
+            openai_api_key=self.chat_data.llm_settings.llm_key
+        )
+
+        self.summarized_history = ""
+        self.memory = None
+        if self.chat_data.chat_history:
+            self.summarized_history, self.memory = self._summarize_history()
+        
+        # Detect the intent first
         intent_name = self._detect_intent()
+
+        # Now invoke the QA model to get the response
         qa = self._get_qa_instance(intent_name)
         result = qa.invoke({"question": self.chat_data.user_input})
-        
-        response_text = result.get("answer", "")
-        sources_list = result.get("sources", "")
 
+        response_text = result.get("answer", "")
+        sources_documents = result.get("source_documents", [])
+        sources_list = []
+        for doc in sources_documents:
+            source_value = doc.metadata.get(next((key for key in doc.metadata if key.lower() == "source"), ""), "")
+            type_value = doc.metadata.get(next((key for key in doc.metadata if key.lower() == "type"), ""), "")
+            if not any(item.source == source_value and item.type == type_value for item in sources_list):
+                sources_list.append(
+                    model_rag.Source(
+                        source=source_value,
+                        type=type_value,
+                        title=doc.metadata.get(next((key for key in doc.metadata if key.lower() == "title"), ""), ""),
+                        country=doc.metadata.get(next((key for key in doc.metadata if key.lower() == "country"), ""), ""),
+                        language=doc.metadata.get(next((key for key in doc.metadata if key.lower() == "language"), ""), "")
+                    )
+                )
+        
         return model_rag.ChatResponse(response=response_text, sources=sources_list)
 
     
@@ -105,44 +135,35 @@ class RAG:
         return qa_retriever
 
     def _get_qa_instance(self, intent_name):
-        # Build chat prompt for the detected intent
         dynamic_prompt_content = self._build_chat_prompt(intent_name)
-
-        # Create the prompt template
+            
         prompt_template = PromptTemplate(
             template=dynamic_prompt_content,
             input_variables=['summaries', 'question']
         )
-
-        # Initialize the chat model using settings from RAGSettings
-        llm_eva = ChatOpenAI(
-            model_name=self.chat_data.rag_settings.chat_model_name.value,
-            temperature=self.chat_data.rag_settings.temperature.value,
-            max_tokens=self.chat_data.rag_settings.max_tokens_for_response.value,
-            openai_api_key=self.chat_data.llm_settings.llm_key,
-            streaming=False
-        )
-
-        # Get retriever and memory for the conversation
+    
         qa_retriever = self._get_qa_retriever()
-        memory = ConversationSummaryBufferMemory(
-            memory_key="history",
-            input_key="question",
-            llm=llm_eva
-        )
 
-        # Build the RAG chain
-        qa = RetrievalQAWithSourcesChain.from_chain_type(
-            llm=llm_eva,
-            chain_type="stuff",
-            retriever=qa_retriever,
-            return_source_documents=False,
-            chain_type_kwargs={
+        if self.memory:
+            chain_type_kwargs = {
                 "verbose": False,
                 "prompt": prompt_template,
-                "memory": memory
+                "memory": self.memory  # Include memory if available
             }
+        else:
+            chain_type_kwargs = {
+                "verbose": False,
+                "prompt": prompt_template
+            }
+
+        qa = RetrievalQAWithSourcesChain.from_chain_type(
+            llm=self.llm_eva,
+            chain_type="stuff",
+            retriever=qa_retriever,
+            return_source_documents=True,
+            chain_type_kwargs=chain_type_kwargs
         )
+    
         return qa
 
     def _detect_intent(self):
@@ -177,3 +198,26 @@ class RAG:
         if detected_intent not in self.chat_data.intent_details:
             return "none"
         return detected_intent
+    
+    def _summarize_history(self):
+        if not self.chat_data.chat_history:
+            return "", None
+        
+        history = ChatMessageHistory()
+        for conv in self.chat_data.chat_history:
+            if conv.role.lower() == 'human':
+                history.add_message(HumanMessage(content=conv.message))
+            elif conv.role.lower() == 'ai':
+                history.add_message(SystemMessage(content=conv.message))
+            
+        memory = ConversationSummaryMemory.from_messages(
+            llm=self.llm_eva,
+            chat_memory=history,
+            return_messages=True,
+            memory_key="history",
+            input_key="question"
+        )
+
+        summarized_history = memory.buffer
+       
+        return summarized_history, memory
