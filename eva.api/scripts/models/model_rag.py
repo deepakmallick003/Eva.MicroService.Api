@@ -5,8 +5,8 @@ class Source(BaseModel):
     source: str
     type: str
     title: str
-    country: str
-    language: str
+    country: Optional[str]
+    language: Optional[str]
 
 class IntentDetails(BaseModel):
     filename: str

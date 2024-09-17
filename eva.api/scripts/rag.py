@@ -37,24 +37,14 @@ class RAG:
         result = qa.invoke({"question": self.chat_data.user_input})
 
         response_text = result.get("answer", "")
-        sources_documents = result.get("source_documents", [])
-        sources_list = []
-        for doc in sources_documents:
-            source_value = doc.metadata.get(next((key for key in doc.metadata if key.lower() == "source"), ""), "")
-            type_value = doc.metadata.get(next((key for key in doc.metadata if key.lower() == "type"), ""), "")
-            if not any(item.source == source_value and item.type == type_value for item in sources_list):
-                sources_list.append(
-                    model_rag.Source(
-                        source=source_value,
-                        type=type_value,
-                        title=doc.metadata.get(next((key for key in doc.metadata if key.lower() == "title"), ""), ""),
-                        country=doc.metadata.get(next((key for key in doc.metadata if key.lower() == "country"), ""), ""),
-                        language=doc.metadata.get(next((key for key in doc.metadata if key.lower() == "language"), ""), "")
-                    )
-                )
+        response_text, display_source = self._format_response(response_text)
+        if display_source is True:
+            sources_documents = result.get("source_documents", [])            
+            sources_list = self._extract_sources(sources_documents)
+        else:
+            sources_list=[]
         
         return model_rag.ChatResponse(response=response_text, sources=sources_list)
-
     
     ##Private Methods
 
@@ -126,10 +116,15 @@ class RAG:
 
         # Configure retriever with settings from RAGSettings
         qa_retriever = vector_store.as_retriever(
-            search_type="similarity_score_threshold",
-            search_kwargs={
-                "k": self.chat_data.rag_settings.max_chunks_to_retrieve.value,
-                "score_threshold": self.chat_data.rag_settings.retrieved_chunks_min_relevance_score.value
+            # search_type="similarity_score_threshold",
+            # search_kwargs={
+            #     "k": self.chat_data.rag_settings.max_chunks_to_retrieve.value,
+            #     "score_threshold": self.chat_data.rag_settings.retrieved_chunks_min_relevance_score.value
+            # }
+            search_type="mmr",
+            search_kwargs={"k": self.chat_data.rag_settings.max_chunks_to_retrieve.value, 
+                           "fetch_k": 50, 
+                           "lambda_mult": 0.5
             }
         )
         return qa_retriever
@@ -221,3 +216,30 @@ class RAG:
         summarized_history = memory.buffer
        
         return summarized_history, memory
+
+    def _extract_sources(self, sources_documents):
+        sources_list = []
+        for doc in sources_documents:
+            language=doc.metadata.get(next((key for key in doc.metadata if key.lower() == "language"), ""), "")
+            if language.lower()=="english":
+                sources_list.append(
+                    model_rag.Source(
+                        source=doc.metadata.get(next((key for key in doc.metadata if key.lower() == "source"), ""), ""),
+                        type=doc.metadata.get(next((key for key in doc.metadata if key.lower() == "type"), ""), ""),
+                        title=doc.metadata.get(next((key for key in doc.metadata if key.lower() == "title"), ""), ""),
+                        country=doc.metadata.get(next((key for key in doc.metadata if key.lower() == "country"), ""), ""),
+                        language=doc.metadata.get(next((key for key in doc.metadata if key.lower() == "language"), ""), "")
+                    )
+                )
+        return sources_list
+
+    def _format_response(self, response_text):
+        display_source = False
+        try:
+            if "<displaysource>" in response_text and "</displaysource>" in response_text:
+                display_source = response_text.split("<displaysource>")[1].split("</displaysource>")[0].strip() == "true"
+                response_text = response_text.replace(f"<displaysource>{'true' if display_source else 'false'}</displaysource>", "")
+        except Exception as e:
+            pass 
+    
+        return response_text, display_source

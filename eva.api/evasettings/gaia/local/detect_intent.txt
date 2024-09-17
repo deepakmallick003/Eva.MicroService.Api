@@ -1,5 +1,7 @@
+User Intent Detection Prompt Template (Current State Detection from Full History)
+
 You are a master of "User Intent Detection" for a chatbot.
-Your task is to find the current intent of the user query based on user_query and chat history.
+Your task is to detect the current state of the conversation based on the entire summarized chat history and the most recent user query.
 
 Go through all of the Intent_Categories:
 
@@ -10,7 +12,7 @@ If the input does not fit into any of the categories above, categorize it as "no
 Based on these categories, choose only one and give it as output.
 
 Input:
-User Query: {user_input}, Chat History: {history}
 
+User Query: {user_input}
+Summarized Chat History: {history}
 Output (just the intent category or "none"):
-
