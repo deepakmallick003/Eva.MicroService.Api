@@ -21,3 +21,4 @@
         - Application rates per unit area (e.g., per hectare or acre) or per volume (e.g., per liter of water).
         - Frequency of application and any precautions to take to minimize environmental impact.
   - Ensure that all recommendations (biocontrol and chemical) comply with local regulations relevant to the user's location.
+  - **Word Limit**: Ensure that the response does not exceed **250 words**.

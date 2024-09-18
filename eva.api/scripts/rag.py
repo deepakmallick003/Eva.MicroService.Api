@@ -2,6 +2,7 @@ from scripts.models import model_rag
 from scripts.vectordatabases import BaseDB
 
 import os
+import re
 from langchain.chains import RetrievalQAWithSourcesChain
 from langchain_core.runnables import RunnableSequence
 from langchain_openai import OpenAIEmbeddings, ChatOpenAI
@@ -36,15 +37,10 @@ class RAG:
         qa = self._get_qa_instance(intent_name)
         result = qa.invoke({"question": self.chat_data.user_input})
 
-        response_text = result.get("answer", "")
-        response_text, display_source = self._format_response(response_text)
-        if display_source is True:
-            sources_documents = result.get("source_documents", [])            
-            sources_list = self._extract_sources(sources_documents)
-        else:
-            sources_list=[]
-        
-        return model_rag.ChatResponse(response=response_text, sources=sources_list)
+        response_text, extracted_source_ids = self._format_response(result.get("answer", ""))
+        source_list = self._extract_sources(result.get("source_documents", []), extracted_source_ids)
+
+        return model_rag.ChatResponse(response=response_text, sources=source_list)
     
     ##Private Methods
 
@@ -124,7 +120,7 @@ class RAG:
             search_type="mmr",
             search_kwargs={"k": self.chat_data.rag_settings.max_chunks_to_retrieve.value, 
                            "fetch_k": 50, 
-                           "lambda_mult": 0.5
+                           "lambda_mult": 0.2
             }
         )
         return qa_retriever
@@ -217,29 +213,36 @@ class RAG:
        
         return summarized_history, memory
 
-    def _extract_sources(self, sources_documents):
-        sources_list = []
+    def _extract_sources(self, sources_documents, extracted_source_ids):
+        filtered_sources_list = []
         for doc in sources_documents:
-            language=doc.metadata.get(next((key for key in doc.metadata if key.lower() == "language"), ""), "")
-            if language.lower()=="english":
-                sources_list.append(
-                    model_rag.Source(
-                        source=doc.metadata.get(next((key for key in doc.metadata if key.lower() == "source"), ""), ""),
-                        type=doc.metadata.get(next((key for key in doc.metadata if key.lower() == "type"), ""), ""),
-                        title=doc.metadata.get(next((key for key in doc.metadata if key.lower() == "title"), ""), ""),
-                        country=doc.metadata.get(next((key for key in doc.metadata if key.lower() == "country"), ""), ""),
-                        language=doc.metadata.get(next((key for key in doc.metadata if key.lower() == "language"), ""), "")
+            source_id = doc.metadata.get(next((key for key in doc.metadata if key.lower() == "source"), ""), "")
+            if source_id in extracted_source_ids:
+                language = doc.metadata.get(next((key for key in doc.metadata if key.lower() == "language"), ""), "")
+                if language.lower() == "english":
+                    filtered_sources_list.append(
+                        model_rag.Source(
+                            source=source_id,
+                            type=doc.metadata.get(next((key for key in doc.metadata if key.lower() == "type"), ""), ""),
+                            title=doc.metadata.get(next((key for key in doc.metadata if key.lower() == "title"), ""), ""),
+                            country=doc.metadata.get(next((key for key in doc.metadata if key.lower() == "country"), ""), ""),
+                            language=language
+                        )
                     )
-                )
-        return sources_list
-
-    def _format_response(self, response_text):
-        display_source = False
-        try:
-            if "<displaysource>" in response_text and "</displaysource>" in response_text:
-                display_source = response_text.split("<displaysource>")[1].split("</displaysource>")[0].strip() == "true"
-                response_text = response_text.replace(f"<displaysource>{'true' if display_source else 'false'}</displaysource>", "")
-        except Exception as e:
-            pass 
+        return filtered_sources_list
     
-        return response_text, display_source
+    def _format_response(self, response_text):
+        extracted_sources = []
+        try:
+            source_tag_pattern = r"<sources>(.*?)<\/sources>"
+            matches = re.findall(source_tag_pattern, response_text, re.DOTALL)
+            for match in matches:
+                pans = re.split(r"\s*,\s*|\n+", match)
+                pans = [pan for pan in pans if pan.isdigit()]  # Only keep numeric values
+                extracted_sources.extend(pans)
+
+            response_text = re.sub(source_tag_pattern, '', response_text).strip()
+        except Exception as e:
+            print(f"Error while extracting sources: {e}")
+
+        return response_text, extracted_sources
