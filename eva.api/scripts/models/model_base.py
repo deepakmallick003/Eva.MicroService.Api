@@ -44,6 +44,7 @@ class MaxChunkLimit(int, Enum):
     Limit_5 = 5
     Limit_10 = 10
     Limit_20 = 20
+    Limit_50 = 50
 
 class ChunkRelevance(float, Enum):
     """Chunk relevance score threshold."""
@@ -108,6 +109,7 @@ class RAGRoles(str, Enum):
     Human = "Human"
     AI = "AI"    
 
+
 ######
 
 
@@ -118,9 +120,9 @@ class DocumentChunk(BaseModel):
 
     @field_validator('metadata')
     def check_required_keys(cls, v):
-        required_keys = ['Source', 'Type']
+        required_keys = ['source', 'type']
         if v is None:
-            raise ValueError("metadata cannot be None and must contain 'Source' and 'Type'.")
+            raise ValueError("metadata cannot be None and must contain 'source' and 'type'.")
         for key in required_keys:
             if key not in v:
                 raise ValueError(f"'{key}' is a required key in metadata.")
