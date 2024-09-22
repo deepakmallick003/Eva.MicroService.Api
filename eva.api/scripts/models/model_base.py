@@ -1,5 +1,6 @@
-from pydantic import BaseModel, field_validator 
-from typing import List, Dict, Optional, Any
+from pydantic import BaseModel, field_validator, Field
+from typing import List, Dict, Optional, Any, Union
+from typing_extensions import Annotated
 from enum import Enum
 
 
@@ -16,6 +17,12 @@ class VectorSimilarityFunction(str, Enum):
     Cosine = 'cosine'
     Euclidean = 'euclidean'
     DotProduct = 'dotProduct'
+
+class RetrieverSearchType(str, Enum):
+    """Available similarity functions for vector search."""
+    Similarity = 'similarity'
+    Similarity_Score_Threshold = 'similarity_score_threshold'
+    MMR = 'mmr'
 
 class EmbeddingModelName(str, Enum):
     """Supported embedding models."""
@@ -36,7 +43,7 @@ class ChatModelName(str, Enum):
     GPT_3_5_Turbo = 'gpt-3.5-turbo'
     GPT_3_5_Turbo_16K = 'gpt-3.5-turbo-16k'
     GPT_4 = 'gpt-4'
-    GPT_4_32K = 'gpt-4-32k'
+    GPT_4_32K = 'gpt-4-turbo'
     GPT_4_Omni = 'gpt-4o'
 
 class MaxChunkLimit(int, Enum):
@@ -78,14 +85,6 @@ class TemperatureLevel(float, Enum):
     High = 0.7       # Significant randomness, creative responses.
     VeryHigh = 1.0   # Maximum randomness, highly creative and varied responses.
 
-class TokenLimit(int, Enum):
-    """Maximum tokens for the response."""
-    Limit_200 = 200
-    Limit_500 = 500
-    Limit_1000 = 1000
-    Limit_1500 = 1500
-    Limit_2000 = 2000
-
 class FrequencyPenalty(float, Enum):
     """Frequency penalty to discourage repeating the same tokens."""
     NoPenalty = 0.0    # No penalty, allows for repeated words.
@@ -109,6 +108,11 @@ class RAGRoles(str, Enum):
     Human = "Human"
     AI = "AI"    
 
+class RAGStrategy(str, Enum):
+    """Different Types of RAG Strategy"""
+    Version1 = "v1"
+    Version2 = "v2"
+    Version3 = "v3"
 
 ######
 
@@ -152,14 +156,21 @@ class LLMSettings(BaseModel):
     vector_dimension_size: VectorDimensionSize = VectorDimensionSize.Dim1536
     embedding_model_name: EmbeddingModelName = EmbeddingModelName.TextEmbedding3Small
 
+class RetrieverSettings(BaseModel):
+    search_type: RetrieverSearchType = RetrieverSearchType.MMR
+    max_chunks_to_retrieve: Annotated[int, Field(ge=10, le=50)] = 10  
+    retrieved_chunks_min_relevance_score: Annotated[float, Field(ge=0.0, le=1.0)] = 0.2
+    fetch_k: Annotated[int, Field(ge=50, le=1000)] = 200  
+    lambda_mult: Annotated[float, Field(ge=0.0, le=1.0)] = 0.3
+
 class RAGSettings(BaseModel):
     """
     RAG (Retrieval-Augmented Generation) configuration settings.
     """
     chat_model_name: Optional[ChatModelName] = ChatModelName.GPT_4_Omni
-    max_chunks_to_retrieve: Optional[MaxChunkLimit] = MaxChunkLimit.Limit_10
-    retrieved_chunks_min_relevance_score: Optional[ChunkRelevance] = ChunkRelevance.Percent_20
-    max_tokens_for_response: Optional[TokenLimit] = TokenLimit.Limit_500
+    max_tokens_for_response: Annotated[int, Field(ge=50, le=2000)] = 500  
+    retriever_search_settings: RetrieverSettings = RetrieverSettings()
     temperature: Optional[TemperatureLevel] = TemperatureLevel.VeryLow
     frequency_penalty: Optional[FrequencyPenalty] = FrequencyPenalty.MediumLow
     presence_penalty: Optional[PresencePenalty] = PresencePenalty.MediumLow
+    max_tokens_for_history: Annotated[int, Field(ge=50, le=2000)] = 300 

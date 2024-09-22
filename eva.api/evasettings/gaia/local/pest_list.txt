@@ -1,8 +1,0 @@
-- **Essential Elements**:
-  - The **crop** and **location** (country or region) are required to generate a pest list.
-- **Follow-up Questions** (if necessary):
-  - If either the crop or location is missing from the conversation history (`<hs></hs>`) or user input (`<ques></ques>`), ask:
-    - "Can you specify the crop you're asking about?"
-    - "Can you specify the country or region you're asking about?"
-- **Response**:
-  - Provide a list of pests affecting the specified crop in the given location.

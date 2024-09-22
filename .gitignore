@@ -139,3 +139,4 @@ cython_debug/
 .vscode/
 data/
 /.vs
+eva.api/evasettings/gaia/local/old/

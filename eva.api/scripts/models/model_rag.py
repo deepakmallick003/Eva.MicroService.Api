@@ -11,6 +11,7 @@ class Source(BaseModel):
 class IntentDetails(BaseModel):
     filename: str
     description: Optional[str] = None
+    required_fields_prior_responding: Optional[List[str]] = None
 
 class ConversationMessage(BaseModel):
     role: RAGRoles 
@@ -20,13 +21,18 @@ class ChatRequest(BaseModel):
     db_type: VectorDatabaseType 
     db_settings: DBSettings 
     llm_settings: LLMSettings
-    rag_settings: RAGSettings = RAGSettings()
-    user_input: str
-    chat_history: Optional[List[ConversationMessage]] = None
+    rag_type: RAGStrategy = RAGStrategy.Version3
+    rag_settings: RAGSettings = RAGSettings()    
+    strict_follow_up: bool = False
     prompt_template_directory_name: str
-    base_prompt_template_file_name: str
-    intent_detection_prompt_template_file_name: Optional[str] = None
+    base_prompt_template_file_name: Optional[str] = "base_template.txt"
+    intent_detection_prompt_template_file_name: Optional[str] = "detect_intent.txt"
     intent_details: Optional[Dict[str, IntentDetails]] = None
+    memory_prompt_template_file_name: Optional[str] = "memory_summarizer.txt"
+    follow_up_prompt_template_file_name: Optional[str] = "follow_up.txt"
+    free_flowing_prompt_template_file_name: Optional[str] = "free_flowing.txt"
+    chat_history: Optional[List[ConversationMessage]] = None
+    user_input: str
 
 class ChatResponse(BaseModel):
     response: str  

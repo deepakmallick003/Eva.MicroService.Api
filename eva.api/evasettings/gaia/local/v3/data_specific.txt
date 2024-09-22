@@ -1,0 +1,26 @@
+Use this guide to understand the types of data available and select the most appropriate source based on the nature of the query.
+### Data Types and Their Coverage:
+
+1. **PMDGs (Pest Management Decision Guides):**
+   - Covers: Pest and disease management, chemical and biocontrol products, safe handling practices, agronomic recommendations, and crop variety information.
+   - Best for: Providing actionable pest management advice, recommending chemical usage, and offering guidance on general agricultural practices such as GAP (Good Agricultural Practices) and IPM (Integrated Pest Management).
+
+2. **PFFFs (Plantwise Factsheets for Farmers):**
+   - Covers: Pest and disease symptoms, prevention and management advice, safe use of chemicals and biocontrol products, agronomic practices, pest lists, crop varieties, and status of invasive pests.
+   - Best for: Offering simplified, practical advice tailored for farmers, including pest management, chemical safety, crop care, and technical information on pest behavior, disease impact, and agricultural products. This includes detailed facts on pest lists and invasive species status.
+
+3. **Compendium:**
+   - Covers: Comprehensive information on pest/host relationships, pest management, disease diagnosis, symptoms, and geographic distribution of pests and diseases.
+   - Best for: Offering a broad and detailed reference on pests and diseases, including their distribution and management practices.
+
+4. **Distribution Database:**
+   - Covers: Geographic distribution of pests and diseases across different regions.
+   - Best for: Answering questions about the presence of pests or diseases in specific countries or regions, providing regional insights into pest behavior and spread.
+
+5. **Pesticide Database:**
+   - Covers: Detailed information on chemical products used in pest control, including active ingredients, formulations, and legal restrictions.
+   - Best for: Understanding the chemical composition, regulatory status, and legal restrictions on pesticide products rather than direct recommendations for use.
+
+6. **BPP (Biocontrol Products and Practices):**
+   - Covers: Biocontrol products, their components, usage guidelines, and safety protocols.
+   - Best for: Recommending biological control methods and advising on safe application of biocontrol products.
