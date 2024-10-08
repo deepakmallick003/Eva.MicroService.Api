@@ -1,10 +1,11 @@
 from fastapi import FastAPI, Request, Security, HTTPException
-from fastapi.responses import RedirectResponse
+from fastapi.responses import RedirectResponse, StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
 from core.config import settings
 from core.auth import auth_scheme
 from routers import health
 from scripts import *
+import asyncio
 
 def get_application() -> FastAPI:
 
@@ -80,13 +81,37 @@ def get_application() -> FastAPI:
     @app.post("/chatbot-response", response_model=model_rag.ChatResponse, 
               dependencies=[Security(auth_scheme)], tags=["API"])
     async def get_chatbot_response(payload: model_rag.ChatRequest):
-        try:
+        try:            
             chat_processor = rag.RAG(payload)
             response = chat_processor.get_response()
             return response
         except Exception as e:
             raise HTTPException(status_code=500, detail=f"Chatbot request failed: {str(e)}")
 
+    @app.post("/chatbot-response-stream", 
+              dependencies=[Security(auth_scheme)], tags=["API"])
+    async def get_chatbot_response_stream(payload: model_rag.ChatRequest):
+        try:            
+            chat_processor = rag.RAG(payload)
+            return StreamingResponse(chat_processor.get_response_stream(), media_type='text/event-stream')
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"Chatbot request failed: {str(e)}")
+
+
+
+    # async def fake_data_streamer():
+    #     for i in range(10):
+    #         yield b'some fake data\n\n'
+    #         await asyncio.sleep(0.5)
+
+    # @app.get('/test-streaming', tags=["API"])
+    # async def test_streaming():
+    #     return StreamingResponse(fake_data_streamer(), media_type='text/event-stream')
+    #     # or, use:
+    #     '''
+    #     headers = {'X-Content-Type-Options': 'nosniff'}
+    #     return StreamingResponse(fake_data_streamer(), headers=headers, media_type='text/plain')
+    #     '''
 
 
     return app

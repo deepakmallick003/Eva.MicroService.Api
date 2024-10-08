@@ -14,6 +14,8 @@ class ApplicationSettings(BaseSettings):
     CABI_TenantId: str = Field(default="", alias='AzureAd__TenantId')
     EVA_SETTINGS_ENVIRONMENT_DIRECTORY: str = Field(default='', alias='FileStoreSettings__StorageDirectory')
 
+    class Config:
+        extra = "allow"
 
 class Settings(ApplicationSettings):
     PROJECT_NAME: str = 'EVA API'

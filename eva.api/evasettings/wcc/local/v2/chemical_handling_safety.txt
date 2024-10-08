@@ -1,0 +1,8 @@
+- **Essential Elements**:
+  - The **chemical/pesticide** name is required to provide safety advice.
+- **Follow-up Questions** (if necessary):
+  - If the chemical/pesticide name is missing from the conversation history (`<hs></hs>`) or user input (`<ques></ques>`), ask:
+    - "Which chemical or pesticide are you planning to use?"
+    - "Are you asking about personal safety, environmental precautions, or both?"
+- **Response**:
+  - Provide recommendations for personal protective equipment (PPE) and safety precautions for the handling, storage, and disposal of the chemical.

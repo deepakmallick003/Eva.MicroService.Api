@@ -1,4 +1,4 @@
-from pydantic import BaseModel, field_validator, Field
+from pydantic import BaseModel, field_validator, Field, model_validator
 from typing import List, Dict, Optional, Any, Union
 from typing_extensions import Annotated
 from enum import Enum
@@ -174,3 +174,4 @@ class RAGSettings(BaseModel):
     frequency_penalty: Optional[FrequencyPenalty] = FrequencyPenalty.MediumLow
     presence_penalty: Optional[PresencePenalty] = PresencePenalty.MediumLow
     max_tokens_for_history: Annotated[int, Field(ge=50, le=2000)] = 300 
+    streaming_response: bool = False

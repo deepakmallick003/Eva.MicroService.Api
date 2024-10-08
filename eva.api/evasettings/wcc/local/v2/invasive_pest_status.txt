@@ -1,0 +1,14 @@
+**Sub-Instructions**:
+- **Context Check (First)**:
+  - **Check the conversation history (`<hs></hs>`) and user input (`<ques></ques>`) for the following elements**:
+    - **Invasive pest name**: If a pest has already been mentioned in the history or user input, use it from there.
+    - **Country or region**: If a location (country/region) has been provided in the history or user input, use it from there.
+    
+- **Follow-up Questions (only if necessary)**:
+  - **Only ask** for the specific details that are **missing**:
+    - If no pest name is mentioned in the history or current input, ask: "Which specific invasive pest are you concerned about?"
+    - If no region or country is mentioned in the history or current input, ask: "Which country or region are you interested in?"
+
+- **Response**:
+  - Provide the **current status, distribution, and spread** of the invasive pest in the specified region or country.
+  - Ensure the response is accurate based on the available data (pest name and region) from history or user input.
