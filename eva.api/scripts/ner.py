@@ -61,14 +61,13 @@ class Concept_NER:
 
     def _get_ner_model_path(self): 
         wd = os.getcwd()
-        project_directory_path = os.path.join(
-            wd,
-            settings.EVA_SETTINGS_PATH,
-            self.project_directory_name,
-            settings.EVA_SETTINGS_ENVIRONMENT_DIRECTORY
-        )
         ner_model_name = f"{self.project_directory_name}_concept_ner_model"
-        ner_model_path = os.path.join(project_directory_path, ner_model_name)
+
+        ner_model_path = wd + settings.EVA_SETTINGS_PATH + \
+          '/' + self.project_directory_name + \
+          '/' + settings.EVA_SETTINGS_ENVIRONMENT_DIRECTORY + \
+          '/' + ner_model_name
+        
         return ner_model_path
     
     def _load_spacy_model(self):
