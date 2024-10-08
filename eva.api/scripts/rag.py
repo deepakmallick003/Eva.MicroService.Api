@@ -20,8 +20,13 @@ class RAG:
 
     def get_response(self):
         result = self.rag_instance.get_response()
-        response_text, extracted_source_ids = self._format_response(result.get("answer", ""))
-        source_list = self._extract_sources(result.get("source_documents", []), extracted_source_ids)
+
+        if(isinstance(result, model_rag.ChatResponse)):
+            response_text = result.response
+            source_list = result.sources
+        else:
+            response_text, extracted_source_ids = self._format_response(result.get("answer",""))
+            source_list = self._extract_sources(result.get("source_documents", []), extracted_source_ids)
         
         concept_list = []  
         if self.chat_data.fetch_concepts:

@@ -50,7 +50,7 @@ class RAG_V3:
         if self.chat_data.rag_settings.streaming_response and self.llm_streaming_callback_handler:
             llm_params["streaming"] = True
             llm_params["callback_manager"] = [self.llm_streaming_callback_handler]
-        self.llm_eva = ChatOpenAI(**llm_params)
+            self.llm_eva = ChatOpenAI(**llm_params)
 
         qa = self._get_qa_instance()
         
