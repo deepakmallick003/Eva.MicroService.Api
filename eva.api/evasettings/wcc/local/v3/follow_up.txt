@@ -1,0 +1,6 @@
+Based on the user's intent to {intent_name}, generate a concise follow-up question to gather the required missing information.
+
+Missing fields: {missing_fields}
+
+### Example for Diagnosis Intent (if crop and location are missing):
+To provide an accurate diagnosis, it would help if you could specify the **{missing_fields}**.

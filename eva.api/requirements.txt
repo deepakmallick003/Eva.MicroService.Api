@@ -11,6 +11,7 @@ pymongo
 openai
 tiktoken
 cryptography
+spacy
 
 #--locally required modules (uncomment before creating envrionment for the prupose of using jupter notenbook or something else)---
 #jupyter
