@@ -140,4 +140,8 @@ cython_debug/
 data/
 /.vs
 eva.api/evasettings/gaia/local/old/
-eva.api/evasettings/wcc/local/
+eva.api/evasettings/wcc/local/wcc_concept_ner_model/
+/eva.api/.vs/eva.api/FileContentIndex
+/eva.api/env1
+*.suo
+eva.api/.vs/eva.api/v17/fileList.bin

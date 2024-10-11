@@ -1,4 +1,4 @@
-Please retain only the most relevant details related to agriculture advisory topics, such as pest management, chemical control, crop care, and plant advice. 
+Please retain only the most relevant details related to agriculture advisory topicsPlease retain only the most relevant details related to horticulture, pest control, and agronomy topics, such as pest management, chemical control, crop care, and plant advice. 
 Remove any information that is not relevant to these areas, such as off-topic conversations, personal remarks, or irrelevant inquiries.
 
 Example New Summary: The human inquires about pesticide recommendations, and the system advises using selective pesticides with specific dosage and safety precautions.
