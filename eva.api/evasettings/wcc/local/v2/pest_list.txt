@@ -45,5 +45,5 @@ If the user asks the chatbot for a pest list for specific crops in a given count
 
 ### Step 5: Use Fallback if Knowledge Fails Validation
 - **Fallback**: If **the knowledge withing '<ctx></ctx>'** match all criterias (crop, country) provided by the user, return the following fallback message:
-  > "I currently don't have that information, but you can check with your local extension service for more details or checkout the resources on CABI Digital Library [https://www.cabidigitallibrary.org/](https://www.cabidigitallibrary.org/)."
+  > "I currently don't have that information, but you can check with your local extension service for more details or checkout the resources on [CABI Digital Library](https://www.cabidigitallibrary.org/)."
 
