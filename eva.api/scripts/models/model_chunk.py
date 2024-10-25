@@ -7,9 +7,9 @@ class DataChunks(BaseModel):
 
     @field_validator('property_meta_data_map')
     def check_required_keys(cls, v):
-        required_keys = ['Source', 'Type']
+        required_keys = ['source', 'type']
         if v is None:
-            raise ValueError("property_meta_data_map cannot be None and must contain 'Source' and 'Type'.")
+            raise ValueError("property_meta_data_map cannot be None and must contain 'source' and 'Ttype'.")
         for key in required_keys:
             if key not in v:
                 raise ValueError(f"'{key}' is a required key in property_meta_data_map.")
@@ -17,6 +17,7 @@ class DataChunks(BaseModel):
 
 class ChunkDataRequest(BaseModel):
     chunks: List[DataChunks]
+    split_chunks: bool = True
 
 class ChunkDataResponse(BaseModel):
     documents: List[DocumentChunk] 

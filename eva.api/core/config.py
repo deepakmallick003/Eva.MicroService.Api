@@ -12,11 +12,13 @@ class ApplicationSettings(BaseSettings):
     DEPLOYED_BASE_PATH: str = Field(default="/",alias='DEPLOYED_BASE_PATH')
     EVA_API_ClientId: str = Field(default="",alias='AzureAd__ClientId')
     CABI_TenantId: str = Field(default="", alias='AzureAd__TenantId')
+    EVA_SETTINGS_ENVIRONMENT_DIRECTORY: str = Field(default='', alias='FileStoreSettings__StorageDirectory')
 
 
 class Settings(ApplicationSettings):
     PROJECT_NAME: str = 'EVA API'
     DOC_URL: str = '/swagger'
+    EVA_SETTINGS_PATH: str = '/evasettings'
 
     class Config:
         env_file = ".env"

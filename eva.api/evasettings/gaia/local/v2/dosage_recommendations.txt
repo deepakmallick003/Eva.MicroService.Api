@@ -1,0 +1,21 @@
+**Sub-Instructions**:
+- **Essential Elements**:
+  - The chatbot needs the following elements to provide accurate dosage recommendations:
+    - **Location (Country/Region)**
+    - **Specific chemical or biocontrol product**
+    - **Crop type**
+    - **Pest or disease being targeted**
+    - **Size or area of the crop that needs treatment**
+- **Follow-up Questions** (if necessary):
+  - If any of these elements are missing from the conversation history (`<hs></hs>`) or user input (`<ques></ques>`), ask:
+    - "What is your location?"
+    - "Which specific chemical or biocontrol product are you using?"
+    - "What is the crop type and the pest or disease you're targeting?"
+    - "What is the size or area of the crop that needs treatment?"
+- **Dosage Recommendations**:
+  - Provide the following details for the specified chemical or biocontrol product:
+    - The correct dosage per unit area (e.g., per hectare or acre) or per volume (e.g., per liter of water).
+    - Application frequency.
+    - Any restrictions on use for the location.
+    - Special considerations or precautions related to the crop, pest, or environmental conditions (if available).
+  - Ensure that the dosage recommendations comply with country-specific regulations.

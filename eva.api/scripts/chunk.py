@@ -1,3 +1,4 @@
+import json
 from scripts.models import model_chunk
 from typing import Dict, Any
 from langchain.text_splitter import RecursiveJsonSplitter
@@ -7,24 +8,25 @@ class ChunkData:
         self.chunk_data = chunk_data
     
     def process_chunks(self):
-        splitter = RecursiveJsonSplitter(max_chunk_size=400, min_chunk_size=200)
-
         documents = []
-
+        
         for data_chunk in self.chunk_data.chunks:
-            metadata = self.extract_metadata(data_chunk.property_meta_data_map, data_chunk.content)
             if data_chunk.content:
-                json_data = data_chunk.content
-                split_docs = splitter.create_documents(texts=[json_data], metadatas = [metadata])
-
-                for split_doc in split_docs:
-                    document_chunk = self.create_document(
-                        text=split_doc.page_content, 
-                        metadata=split_doc.metadata  
-                    )
-                    documents.append(document_chunk)
-          
-        return model_chunk.ChunkDataResponse(documents=documents)
+                metadata = self.extract_metadata(data_chunk.property_meta_data_map, data_chunk.content)
+                if self.chunk_data.split_chunks:
+                    splitter = RecursiveJsonSplitter(max_chunk_size=400, min_chunk_size=200)
+                    split_docs = splitter.create_documents(texts=[data_chunk.content], metadatas = [metadata])
+                    for split_doc in split_docs:
+                        document_chunk = self.create_document(
+                            text=split_doc.page_content, 
+                            metadata=split_doc.metadata  
+                        )
+                        documents.append(document_chunk)
+                else:
+                    page_content = json.dumps(data_chunk.content)
+                    documents.append(self.create_document(text = page_content, metadata = metadata))
+            
+            return model_chunk.ChunkDataResponse(documents=documents)
 
 
     def process_chunks_internal(self):
