@@ -1,5 +1,5 @@
 from .model_base import *
-
+from .model_ner import Concept
 
 class Source(BaseModel):
     source: str
@@ -31,10 +31,12 @@ class ChatRequest(BaseModel):
     memory_prompt_template_file_name: Optional[str] = "memory_summarizer.txt"
     follow_up_prompt_template_file_name: Optional[str] = "follow_up.txt"
     free_flowing_prompt_template_file_name: Optional[str] = "free_flowing.txt"
+    fetch_concepts: bool = False
     chat_history: Optional[List[ConversationMessage]] = None
     user_input: str
 
 class ChatResponse(BaseModel):
     response: str  
     sources: Optional[List[Source]] = None
+    concepts: Optional[List[Concept]] = None
 

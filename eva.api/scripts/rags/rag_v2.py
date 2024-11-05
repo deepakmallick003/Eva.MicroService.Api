@@ -15,33 +15,38 @@ from core.config import settings
 class RAG_V2:
     def __init__(self, chat_data: model_rag.ChatRequest):
         self.chat_data = chat_data
+        self.llm_streaming_callback_handler = None
 
     ##Public Methods
 
     def get_response(self):
-        self.llm_eva = ChatOpenAI(
-            model_name=self.chat_data.rag_settings.chat_model_name,
-            temperature=self.chat_data.rag_settings.temperature,
-            max_tokens=self.chat_data.rag_settings.max_tokens_for_response,
-            openai_api_key=self.chat_data.llm_settings.llm_key
-        )
+        llm_params = {
+            "openai_api_key": self.chat_data.llm_settings.llm_key,
+            "max_tokens": self.chat_data.rag_settings.max_tokens_for_response,
+            "model_name": self.chat_data.rag_settings.chat_model_name,
+            "temperature": self.chat_data.rag_settings.temperature,
+            "frequency_penalty": self.chat_data.rag_settings.frequency_penalty,
+            "presence_penalty": self.chat_data.rag_settings.presence_penalty
+        }
+
+        self.llm_eva = ChatOpenAI(**llm_params)
 
         self.summarized_history = ""
         self.memory = None
         if self.chat_data.chat_history:
             self.summarized_history, self.memory = self._summarize_history()
         
-        # Detect the intent first
         intent_name = self._detect_intent()
 
-        # Now invoke the QA model to get the response
+        if self.chat_data.rag_settings.streaming_response and self.llm_streaming_callback_handler:
+            llm_params["streaming"] = True
+            llm_params["callback_manager"] = [self.llm_streaming_callback_handler]
+            self.llm_eva = ChatOpenAI(**llm_params)
+
         qa = self._get_qa_instance(intent_name)
+        
         result = qa.invoke({"question": self.chat_data.user_input})
-
-        response_text, extracted_source_ids = self._format_response(result.get("answer", ""))
-        source_list = self._extract_sources(result.get("source_documents", []), extracted_source_ids)
-
-        return model_rag.ChatResponse(response=response_text, sources=source_list)
+        return result
     
     ##Private Methods
 
@@ -237,37 +242,3 @@ class RAG_V2:
         summarized_history = memory.predict_new_summary(memory.chat_memory.messages, "")
        
         return summarized_history, memory
-
-    def _extract_sources(self, sources_documents, extracted_source_ids):
-        filtered_sources_list = []
-        for doc in sources_documents:
-            source_id = doc.metadata.get(next((key for key in doc.metadata if key.lower() == "source"), ""), "")
-            if source_id in extracted_source_ids:
-                language = doc.metadata.get(next((key for key in doc.metadata if key.lower() == "language"), ""), "")
-                if language.lower() == "english":
-                    filtered_sources_list.append(
-                        model_rag.Source(
-                            source=source_id,
-                            type=doc.metadata.get(next((key for key in doc.metadata if key.lower() == "type"), ""), ""),
-                            title=doc.metadata.get(next((key for key in doc.metadata if key.lower() == "title"), ""), ""),
-                            country=doc.metadata.get(next((key for key in doc.metadata if key.lower() == "country"), ""), ""),
-                            language=language
-                        )
-                    )
-        return filtered_sources_list
-    
-    def _format_response(self, response_text):
-        extracted_sources = []
-        try:
-            source_tag_pattern = r"<sources>(.*?)<\/sources>"
-            matches = re.findall(source_tag_pattern, response_text, re.DOTALL)
-            for match in matches:
-                pans = re.split(r"\s*,\s*|\n+", match)
-                pans = [pan for pan in pans if pan.isdigit()]  # Only keep numeric values
-                extracted_sources.extend(pans)
-
-            response_text = re.sub(source_tag_pattern, '', response_text).strip()
-        except Exception as e:
-            print(f"Error while extracting sources: {e}")
-
-        return response_text, extracted_sources
