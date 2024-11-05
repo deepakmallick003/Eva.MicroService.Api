@@ -1,5 +1,6 @@
 from .model_base import *
 from .model_ner import Concept
+from .model_analytics import SourceAppAnalyticsRequest
 
 class Source(BaseModel):
     source: str
@@ -32,6 +33,7 @@ class ChatRequest(BaseModel):
     follow_up_prompt_template_file_name: Optional[str] = "follow_up.txt"
     free_flowing_prompt_template_file_name: Optional[str] = "free_flowing.txt"
     fetch_concepts: bool = False
+    source_app_analytics: Optional[SourceAppAnalyticsRequest] = None
     chat_history: Optional[List[ConversationMessage]] = None
     user_input: str
 

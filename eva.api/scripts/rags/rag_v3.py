@@ -4,6 +4,8 @@ from scripts.vectordatabases import BaseDB
 import os
 import re
 import json
+import time
+import tiktoken
 from langchain.chains import RetrievalQAWithSourcesChain
 from langchain_core.runnables import RunnableSequence
 from langchain_openai import OpenAIEmbeddings, ChatOpenAI
@@ -17,6 +19,7 @@ class RAG_V3:
     def __init__(self, chat_data: model_rag.ChatRequest):
         self.chat_data = chat_data
         self.llm_streaming_callback_handler = None
+        self.eva_analytics = []
 
     ## Public Methods
     def get_response(self):
@@ -52,13 +55,55 @@ class RAG_V3:
             llm_params["callback_manager"] = [self.llm_streaming_callback_handler]
             self.llm_eva = ChatOpenAI(**llm_params)
 
-        qa = self._get_qa_instance()
-        
-        result = qa.invoke({"question": self.chat_data.user_input})
-        return result
+        result = self.invoke_qa()
+        return result, self.eva_analytics
 
         
     ## Private Methods
+
+    def invoke_qa(self):
+        qa_instance = self._get_qa_instance()
+        
+        start_time = time.time()
+        result = qa_instance.invoke({"question": self.chat_data.user_input})
+        end_time = time.time()
+        latency = end_time - start_time
+
+        source_documents = result.get("source_documents", [])
+        summaries = "\n".join([doc.page_content for doc in source_documents])
+
+        try:
+            tokenizer = tiktoken.encoding_for_model(self.chat_data.rag_settings.chat_model_name)
+        except:
+            tokenizer = tiktoken.encoding_for_model("gpt-4o")
+
+        formatted_prompt = self.chat_prompt_content.format(
+            history=self.summarized_history,
+            summaries=summaries,
+            question=self.chat_data.user_input
+        )
+
+        prompt_tokens = len(tokenizer.encode(formatted_prompt))
+
+        output_text = result.get("answer", "")
+        completion_tokens = len(tokenizer.encode(output_text))
+
+        total_tokens = prompt_tokens + completion_tokens
+
+        self.eva_analytics.append({
+            "event": "invoke_qa",
+            "response_time_in_seconds": latency,
+            "response_metadata": {
+                "model_name": self.chat_data.rag_settings.chat_model_name,
+                "token_usage": {
+                    "prompt_tokens": prompt_tokens,
+                    "completion_tokens": completion_tokens,
+                    "total_tokens": total_tokens
+                }
+            }
+        })
+
+        return result
 
     def _follow_up_questions(self):
         follow_up_prompt = self._load_template(
@@ -88,6 +133,11 @@ class RAG_V3:
         follow_up_result = follow_up_chain.invoke({
             "missing_fields": ", ".join(missing_fields),
             "intent_name": self.detected_intent
+        })
+
+        self.eva_analytics.append({
+            "event": "_follow_up_questions",
+            "response_metadata": follow_up_result.response_metadata
         })
     
         return follow_up_result.content.strip()
@@ -157,10 +207,10 @@ class RAG_V3:
         return qa_retriever
 
     def _get_qa_instance(self):
-        chat_prompt_content = self._build_chat_prompt()
-            
+        self.chat_prompt_content = self._build_chat_prompt()
+
         prompt_template = PromptTemplate(
-            template=chat_prompt_content,
+            template=self.chat_prompt_content,
             input_variables=['summaries', 'question']
         )
     
@@ -219,6 +269,10 @@ class RAG_V3:
                               for intent_name, intent_detail in self.chat_data.intent_details.items() if intent_detail.description]),
             "merged_key_fields": ", ".join(merged_key_fields)
         })
+        self.eva_analytics.append({
+            "event": "_detect_intent_and_rephrase_query",
+            "response_metadata": intent_result.response_metadata
+        })
         
         try:
             cleaned_content = re.sub(r"```json|```", "", intent_result.content).strip()
@@ -248,7 +302,11 @@ class RAG_V3:
             "user_input": self.chat_data.user_input,  
             "history": self.summarized_history
         })
-
+        self.eva_analytics.append({
+            "event": "_run_base_prompt",
+            "response_metadata": base_result.response_metadata
+        })
+        
         base_response = base_result.content.strip().strip(' "\'')
         if base_response.lower() == "none":
             return None
