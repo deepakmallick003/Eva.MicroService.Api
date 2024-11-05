@@ -1,8 +1,9 @@
 import asyncio
 import re
 import json
-from scripts.models import model_rag
+from scripts.models import model_rag, model_analytics
 from scripts.rags import BaseRAG, LLMStreamingHandler
+from scripts.analytics import Analytics
 from threading import Thread  
 from queue import Queue  
 
@@ -19,7 +20,7 @@ class RAG:
     ##Public Methods
 
     def get_response(self):
-        result = self.rag_instance.get_response()
+        result, eva_analytics = self.rag_instance.get_response()
 
         if(isinstance(result, model_rag.ChatResponse)):
             response_text = result.response
@@ -31,6 +32,18 @@ class RAG:
         concept_list = []  
         if self.chat_data.fetch_concepts:
             concept_list = self._extract_concepts(response_text)
+
+        if self.chat_data.source_app_analytics:
+            source_project = self.chat_data.source_app_analytics.source_project_name
+            analytics_payload = {
+                "chatbot_data": {
+                    "Chatbot_Analytics_For_Project_" + source_project: {
+                        "Source_App_Tracings": self.chat_data.source_app_analytics.source_app_data,
+                        "EVA_Tracings": eva_analytics if eva_analytics else ""
+                    }
+                }
+            }
+            Analytics().store_analytics(model_analytics.AnalyticsRequest(**analytics_payload))
 
         return model_rag.ChatResponse(response=response_text , sources=source_list, concepts=concept_list)
     

@@ -22,7 +22,11 @@ applications:
       - secret: eva-settings-storage
         mappings:
           - key: StorageDirectory
-            nameAs: FileStoreSettings__StorageDirectory           
+            nameAs: FileStoreSettings__StorageDirectory
+      - secret: eva-settings-apibaseurl
+        mappings:
+          - key: APIBaseURL
+            nameAs: API__BaseURL
             
     seq:
       -enabled: false
