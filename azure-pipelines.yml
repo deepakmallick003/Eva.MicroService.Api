@@ -6,7 +6,6 @@ resources:
   repositories:
     - repository: self
     - repository: deployments
-      ref: feature/AKS/init
       type: git
       name: Cabi.Kubernetes.Deployment.2021
 
