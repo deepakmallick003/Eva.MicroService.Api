@@ -41,14 +41,14 @@ class RAG_V3:
 
         base_response = self._run_base_prompt()
         if base_response is not None:
-            return model_rag.ChatResponse(response=base_response, sources=[])
+            return model_rag.ChatResponse(response=base_response, sources=[]), self.eva_analytics
 
         self._detect_intent_and_rephrase_query()
 
         if self.chat_data.strict_follow_up:
             follow_up_question = self._follow_up_questions()
             if follow_up_question:
-                return model_rag.ChatResponse(response=follow_up_question, sources=[])
+                return model_rag.ChatResponse(response=follow_up_question, sources=[]), self.eva_analytics
 
         if self.chat_data.rag_settings.streaming_response and self.llm_streaming_callback_handler:
             llm_params["streaming"] = True
