@@ -219,7 +219,7 @@ class RAG_V4:
         for doc in unranked_documents:
             source = doc["metadata"].get("source", "unknown")
             content = doc.get("content", "")
-            chunk_sequence = doc["metadata"].get("chunk", 0)  # Use "chunk" as an integer sequence
+            chunk_sequence = int(doc["metadata"].get("chunk", 0))  # Use "chunk" as an integer sequence
             if "text:" in content:
                 text_chunk = content.split("text:", 1)[1].strip()
             else:
