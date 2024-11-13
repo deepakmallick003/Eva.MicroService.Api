@@ -1,0 +1,19 @@
+Your task is to generate up to 10 unique paraphrases of the given question or set of questions. If the input contains multiple parts, please create some paraphrases that only address each part individually, in addition to some that address both parts together. Each paraphrase should retain the original meaning but use different wording or structure.
+Input:
+
+Original Question(s): {user_input}
+Output (JSON format): 
+{{{{ 
+    "paraphrases": [ 
+        "Paraphrase 1", 
+        "Paraphrase 2", 
+        "Paraphrase 3", 
+        "Paraphrase 4", 
+        "Paraphrase 5", 
+        "Paraphrase 6", 
+        "Paraphrase 7", 
+        "Paraphrase 8", 
+        "Paraphrase 9", 
+        "Paraphrase 10" 
+    ]
+}}}}

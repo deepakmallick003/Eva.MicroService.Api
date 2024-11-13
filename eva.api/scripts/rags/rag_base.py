@@ -1,6 +1,7 @@
 from .rag_v1 import RAG_V1
 from .rag_v2 import RAG_V2
 from .rag_v3 import RAG_V3
+from .rag_v4 import RAG_V4
 
 from scripts.models import model_rag
 
@@ -13,6 +14,8 @@ class BaseRAG():
             return RAG_V2(chat_data)
         elif rag_type == model_rag.RAGStrategy.Version3:
             return RAG_V3(chat_data)
+        elif rag_type == model_rag.RAGStrategy.Version4:
+            return RAG_V4(chat_data)
         else:
             #Default
             return RAG_V1(chat_data)
