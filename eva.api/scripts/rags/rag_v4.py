@@ -21,7 +21,7 @@ class RAG_V4:
         self.llm_streaming_callback_handler = None
         self.eva_analytics = []
 
-        self.max_chunks_per_search = 20
+        self.max_chunks_per_search = 35
         self.top_k_chunks_for_summary = 15
         self.weight_chunk_relevancy = 0.6  # Increase impact of chunk relevancy
         self.weight_frequency = 0.4  # Increase impact of frequency
@@ -116,7 +116,8 @@ class RAG_V4:
     
         return {
             "answer": output_text,
-            "source_list": source_documents
+            "source_list": source_documents,
+            "ground_truth_summary": chunk_summary
         }
 
     def _vector_search(self):
