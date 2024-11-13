@@ -113,6 +113,7 @@ class RAGStrategy(str, Enum):
     Version1 = "v1"
     Version2 = "v2"
     Version3 = "v3"
+    Version4 = "v4"
 
 ######
 
@@ -158,7 +159,7 @@ class LLMSettings(BaseModel):
 
 class RetrieverSettings(BaseModel):
     search_type: RetrieverSearchType = RetrieverSearchType.MMR
-    max_chunks_to_retrieve: Annotated[int, Field(ge=10, le=50)] = 10  
+    max_chunks_to_retrieve: Annotated[int, Field(ge=1, le=50)] = 10  
     retrieved_chunks_min_relevance_score: Annotated[float, Field(ge=0.0, le=1.0)] = 0.2
     fetch_k: Annotated[int, Field(ge=50, le=1000)] = 200  
     lambda_mult: Annotated[float, Field(ge=0.0, le=1.0)] = 0.3

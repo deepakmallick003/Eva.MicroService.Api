@@ -22,7 +22,7 @@ class ChatRequest(BaseModel):
     db_type: VectorDatabaseType 
     db_settings: DBSettings 
     llm_settings: LLMSettings
-    rag_type: RAGStrategy = RAGStrategy.Version3
+    rag_type: RAGStrategy = RAGStrategy.Version4
     rag_settings: RAGSettings = RAGSettings()    
     strict_follow_up: bool = False
     prompt_template_directory_name: str
@@ -32,6 +32,8 @@ class ChatRequest(BaseModel):
     memory_prompt_template_file_name: Optional[str] = "memory_summarizer.txt"
     follow_up_prompt_template_file_name: Optional[str] = "follow_up.txt"
     free_flowing_prompt_template_file_name: Optional[str] = "free_flowing.txt"
+    paraphrasing_prompt_template_file_name: Optional[str] = "paraphrase.txt"
+    chunk_summarizer_prompt_template_file_name: Optional[str] = "chunk_summarizer.txt"
     fetch_concepts: bool = False
     source_app_analytics: Optional[SourceAppAnalyticsRequest] = None
     chat_history: Optional[List[ConversationMessage]] = None

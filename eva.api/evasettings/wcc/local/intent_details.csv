@@ -1,0 +1,8 @@
+Name,FileName,Description,RequiredFieldsPriorResponding
+diagnosis,diagnosis.txt,"This intent covers queries related to diagnosing pests or problems affecting crops, including identifying potential pests or diseases based on symptoms, crop type, and location.",crop: country/region/location: symptoms
+symptoms_identification,symptoms_identification.txt,"This intent provides detailed information about symptoms caused by a specificpest or problem, including visual indicators and progression of the symptoms.",pest
+pest_list,pest_list.txt,This intent provides a list of pests that affect a specific crop in a specific country or region.,crop:country/region/location
+ipm_pest_management,ipm_pest_management.txt,"This intent provides integrated pest management (IPM) advice, including prevention strategies, biocontrol recommendations, and chemical pesticide usage for managing pests or diseases on crops.","crop,:country/region/location: pest"
+chemical_handling_safety,chemical_handling_safety.txt,"This intent provides safety advice for handling and applying specific chemicals, including personal protective equipment (PPE), safe storage, and disposal recommendations.",chemical name
+invasive_pest_status,invasive_pest_status.txt,"This intent provides information on the current status, distribution, and spread of invasive pests in a specific country or region.",pest:country/region/location
+dosage_recommendations,dosage_recommendations.txt,"This intent provides dosage recommendations for chemical or biocontrol products, including application rates, frequency, and any location-specific restrictions or precautions.",chemical name:crop:pest:country/region/location:size/area of the crop

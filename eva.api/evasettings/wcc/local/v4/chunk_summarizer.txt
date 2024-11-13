@@ -1,0 +1,11 @@
+Your task is to analyze the retrieved text chunks and generate a concise, factual summary (of length at least 300 words and at max 1000 words) that directly addresses the question(s).
+Please focus on extracting the most relevant information from the chunks that directly relates to the question(s). 
+The output should be a single, coherent summary that serves as a reliable answer foundation.
+
+Input:
+Question(s): {user_input}
+Retrieved Text Chunks (JSON format): 
+{text_chunks}
+
+
+Output (Text Format):

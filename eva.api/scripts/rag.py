@@ -26,9 +26,13 @@ class RAG:
             response_text = result.response
             source_list = result.sources
         else:
-            response_text, extracted_source_ids = self._format_response(result.get("answer",""))
-            source_list = self._extract_sources(result.get("source_documents", []), extracted_source_ids)
-        
+            if "source_list" in result:
+                response_text = result.get("answer","")
+                source_list = result.get("source_list", [])
+            else:
+                response_text, extracted_source_ids = self._format_response(result.get("answer",""))
+                source_list = self._extract_sources(result.get("source_documents", []), extracted_source_ids)
+            
         concept_list = []  
         if self.chat_data.fetch_concepts:
             concept_list = self._extract_concepts(response_text)
@@ -38,6 +42,7 @@ class RAG:
             analytics_payload = {
                 "chatbot_data": {
                     "Chatbot_Analytics_For_Project_" + source_project: {
+                        "App_Name": source_project,
                         "Source_App_Tracings": self.chat_data.source_app_analytics.source_app_data,
                         "EVA_Tracings": eva_analytics if eva_analytics else ""
                     }
