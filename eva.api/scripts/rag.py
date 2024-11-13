@@ -21,6 +21,7 @@ class RAG:
 
     def get_response(self):
         result, eva_analytics = self.rag_instance.get_response()
+        ground_truth_summary = ''
 
         if(isinstance(result, model_rag.ChatResponse)):
             response_text = result.response
@@ -28,6 +29,7 @@ class RAG:
         else:
             if "source_list" in result:
                 response_text = result.get("answer","")
+                ground_truth_summary = result.get("ground_truth_summary","")
                 source_list = result.get("source_list", [])
             else:
                 response_text, extracted_source_ids = self._format_response(result.get("answer",""))
@@ -50,7 +52,7 @@ class RAG:
             }
             Analytics().store_analytics(model_analytics.AnalyticsRequest(**analytics_payload))
 
-        return model_rag.ChatResponse(response=response_text , sources=source_list, concepts=concept_list)
+        return model_rag.ChatResponse(response=response_text, sources=source_list, concepts=concept_list, ground_truth_summary=ground_truth_summary)
     
     async def get_response_stream(self): 
         try: 
