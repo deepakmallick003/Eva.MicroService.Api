@@ -40,7 +40,6 @@ class ChatRequest(BaseModel):
     user_input: str
 
 class ChatResponse(BaseModel):
-    ground_truth_summary: Optional[str]
     response: str  
     sources: Optional[List[Source]] = None
     concepts: Optional[List[Concept]] = None

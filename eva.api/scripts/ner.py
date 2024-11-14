@@ -4,6 +4,9 @@ from scripts.models import model_ner
 from core.config import settings
 
 class Concept_NER:
+
+    nlp=None
+
     def __init__(self, ner_data: model_ner.NERModelRequest):
         if ner_data.concepts:
             self.concepts = ner_data.concepts
@@ -38,8 +41,9 @@ class Concept_NER:
 
     
     def fetch_concepts_with_ner_model(self, text):
-        nlp = self._load_concepts_ner_model()
-        doc = nlp(text)
+        if not Concept_NER.nlp:
+            Concept_NER.nlp = self._load_concepts_ner_model()
+        doc = Concept_NER.nlp(text)
         concepts_list = []
         for ent in doc.ents:
             if ent.label_ == "CONCEPT":

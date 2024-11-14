@@ -114,10 +114,12 @@ class RAG_V4:
             }
         })
     
+        if "I currently don't have that information" in output_text:
+            source_documents=[]
+
         return {
             "answer": output_text,
-            "source_list": source_documents,
-            "ground_truth_summary": chunk_summary
+            "source_list": source_documents
         }
 
     def _vector_search(self):
@@ -211,7 +213,10 @@ class RAG_V4:
                 added_sources.add(source_value)
 
         merged_ranked_filtered_chunks = self._extract_content_by_source(ranked_and_filtered_chunks)
-        chunk_summary = self._chunks_summarizer(merged_ranked_filtered_chunks)
+        
+        text_chunks_string = "\n".join(str(chunk) for chunk in merged_ranked_filtered_chunks)
+        chunk_summary = text_chunks_string
+        # chunk_summary = self._chunks_summarizer(merged_ranked_filtered_chunks)
 
         return source_documents, chunk_summary
     
@@ -499,7 +504,8 @@ class RAG_V4:
 
         except (json.JSONDecodeError, AttributeError, KeyError) as e:        
             pass        
-                
+    
+
     def _run_base_prompt(self):
         base_prompt = self._load_template(
             self.chat_data.prompt_template_directory_name, 
