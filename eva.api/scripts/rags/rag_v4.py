@@ -22,7 +22,7 @@ class RAG_V4:
         self.eva_analytics = []
 
         self.max_chunks_per_search = 35
-        self.top_k_chunks_for_summary = 15
+        self.top_k_chunks_for_summary = 50
         self.weight_chunk_relevancy = 0.6  # Increase impact of chunk relevancy
         self.weight_frequency = 0.4  # Increase impact of frequency
 
@@ -215,8 +215,9 @@ class RAG_V4:
         merged_ranked_filtered_chunks = self._extract_content_by_source(ranked_and_filtered_chunks)
         
         text_chunks_string = "\n".join(str(chunk) for chunk in merged_ranked_filtered_chunks)
-        chunk_summary = text_chunks_string
-        # chunk_summary = self._chunks_summarizer(merged_ranked_filtered_chunks)
+        
+        # chunk_summary = text_chunks_string
+        chunk_summary = self._chunks_summarizer(text_chunks_string)
 
         return source_documents, chunk_summary
     
@@ -247,8 +248,7 @@ class RAG_V4:
     
         return content_by_source
 
-    def _chunks_summarizer(self, merged_chunks_by_source):
-        text_chunks_string = "\n".join(str(chunk) for chunk in merged_chunks_by_source)
+    def _chunks_summarizer(self, text_chunks_string):
         chunk_summary = text_chunks_string       
         
         try:
